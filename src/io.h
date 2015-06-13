@@ -1,6 +1,8 @@
 #ifndef _IO_H_
 #define _IO_H_
 
+#include <stdio.h>
+
 /**
  * Envia um caracter de controle para limpar a tela.
  */
@@ -20,22 +22,8 @@
  * \param src Arquivo a ser lido.
  * \param stop Caracter delimitador
  *
- * \return String com os dados lidos ou NULL em caso de falhas de memória. 
+ * \return String com os dados lidos ou NULL em caso de falhas de memória.
  */
 char *readUntil(FILE *src, char stop);
-
-/**
- * Lê um tweet da entrada padrão de maneira interativa.
- *
- * \param t Tweet onde serão gravados os dados lidos.
- *
- * \return 0 Em caso de sucesso, < 0 em caso de falha.
- */
-int readTweet(Tweet *t);
-
-/**
- * Imprime o tweet dado na saida padrão.
- */
-void printTweet(const Tweet *t);
 
 #endif

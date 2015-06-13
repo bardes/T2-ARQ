@@ -16,5 +16,6 @@ typedef struct {
  * Estrutura interna usada para representar o banco de dados.
  */
 struct _Database_t {
-    
+    DatabaseHeader header;
+    FILE *dataFile;
 };
