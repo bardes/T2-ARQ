@@ -59,6 +59,6 @@ Tweet *readTweet(FILE *f);
  *
  * \return 0 em caso de sucesso, < 0 em caso de erros.
  */
-int writeTweet(FILE *f);
+int writeTweet(FILE *f, Tweet tw);
 
 #endif /* _TWEET_H_ */
