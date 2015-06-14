@@ -38,6 +38,7 @@ Tweet *readTweet(FILE *f)
 	int tweetLen;
 	
 	Tweet *tw;
+	tw = (Tweet*) malloc(sizeof(Tweet));
 	
 	fread(&tweetLen, sizeof(int), 1, f);
 	
