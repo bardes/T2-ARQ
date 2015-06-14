@@ -24,6 +24,6 @@
  *
  * \return String com os dados lidos ou NULL em caso de falhas de memória.
  */
-char *readUntil(FILE *src, char stop);
+char *readUntil(FILE *src, int stop);
 
 #endif

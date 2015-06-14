@@ -24,12 +24,15 @@ typedef struct {
 struct _Database_t {
     DatabaseHeader header;
     FILE *dataFile;
+    char *path;
 };
 
-Database* CreateDatabase(const char* path   )
+Database* CreateDatabase(const char* path)
 {
     Database *db = malloc(sizeof(Database));
     FAIL(db, NULL);
+
+    db->path = strdup(path);
 
     // Abre/cria o arquivo de dados
     int fd = open(path, O_RDWR | O_CREAT);
@@ -56,8 +59,10 @@ Database* CreateDatabase(const char* path   )
 
 void FreeDatabase(Database* db)
 {
+    // Escreve o header antes de fechar o arquivo
     fwrite(&(db->header), sizeof(DatabaseHeader), 1, db->dataFile);
     fclose(db->dataFile);
+    free(db->path);
     free(db);
 }
 
@@ -104,9 +109,6 @@ int InsertTweet(Database* db, const Tweet* t)
     uint32_t prev, best;
     uint32_t len = (uint32_t) SizeOfTweet(t);
     uint32_t spaceLeft = GetBestFit(db, len, &prev, &best);
-
-    // Garante que o bit de deleção está ajustado corretamente
-    SET_BIT(t->flags, ACTIVE_BIT);
 
     if(best == INVALID) { // Inserção normal
         fseek(db->dataFile, 0, SEEK_END);

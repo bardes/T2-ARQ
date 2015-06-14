@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-char* readUntil(FILE* src, char stop)
+char* readUntil(FILE* src, int stop)
 {
     size_t len = 0;
     char *str = NULL;

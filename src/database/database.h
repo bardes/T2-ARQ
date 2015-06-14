@@ -16,7 +16,7 @@
  * \see database.c
  */
 typedef struct _Database_t Database;
-
+typedef struct _DatabaseItr_t DatabaseItr;
 /**
  * Cria um banco de dados no caminho especificado.
  *
@@ -48,5 +48,22 @@ size_t GetSize(const Database *db);
  * Remove um tweet com base em seu byte offset.
  */
 int RemoveTweet(Database *db, uint32_t offset);
+
+/**
+ * Acha todos os tweets feitos pelo usuário dado.
+ */
+TweetSeq FindByUser(Database *db, const char *user);
+
+/**
+ * Pega um iterador para percorrer todos os tweets do DB.
+ */
+DatabaseItr *GetIterator(const Database *db);
+
+/**
+ * Lê o próximo tweet do iterador.
+ *
+ * \return 0 quando lê com sucesso, -1 quando acabar.
+ */
+int GetNextTweet(DatabaseItr *itr, Tweet *dest);
 
 #endif /* _DATABASE_H_ */

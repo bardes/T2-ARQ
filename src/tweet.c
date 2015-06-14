@@ -24,50 +24,58 @@ Tweet *CreateTweet()
     // Aloca o tweet
     Tweet *tw = malloc(sizeof(Tweet));
     FAIL(tw, NULL);
-    
+
     // Inicializa os valores
     tw->text = tw->user
     = tw->coordinates
     = tw->language = NULL;
-    
+
     tw->byteOffset = tw->favs
-    = tw->flags
     = tw->nextFreeEntry
     = tw->retweets
     = tw->views = INVALID;
-    
+
+    tw->flags = 0;
     return tw;
 }
 
 Tweet *ComposeTweet()
 {
-    
     Tweet *tw = CreateTweet();
-    
+
     printf("VIEWS: ");
-    if(scanf(" %u", &(tw->views)) == EOF)
-        FAIL_MSG(0, -1, "Falha ao ler tweet!");
-    
+    if(scanf(" %u", &(tw->views)) != 1) {
+        FreeTweet(tw);
+        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+    }
+
     printf("RETWEETS: ");
-    if(scanf(" %u", &(tw->retweets)) == EOF)
-        FAIL_MSG(0, -1, "Falha ao ler tweet!");
-    
+    if(scanf(" %u", &(tw->retweets)) != 1) {
+        FreeTweet(tw);
+        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+    }
+
     printf("FAVORITES: ");
-    if(scanf(" %u", &(tw->favs)) == EOF)
-        FAIL_MSG(0, -1, "Falha ao ler tweet!");
-    
+    if(scanf(" %u", &(tw->favs)) != 1) {
+        FreeTweet(tw);
+        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+    }
+
     printf("USER: ");
-    tw->user = readUntil(stdin, SEP);
+    tw->user = readUntil(stdin, '\n');
     printf("LANG: ");
-    tw->language = readUntil(stdin, SEP);
+    tw->language = readUntil(stdin, '\n');
     printf("COORDINATES: ");
-    tw->coordinates = readUntil(stdin, SEP);
+    tw->coordinates = readUntil(stdin, '\n');
     printf("TEXT: (CTRL+D para terminar)\n");
-    tw->text = readUntil(stdin, SEP);
-    
+    tw->text = readUntil(stdin, EOF);
+
     if(!(tw->text && tw->user && tw->coordinates && tw->language))
-        FAIL_MSG(0, -1, "Falha ao ler tweet!");
-    
+        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+
+    // Garante que o bit de deleção está ajustado corretamente
+    SET_BIT(t->flags, ACTIVE_BIT);
+
     return tw;
 }
 
