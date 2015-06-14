@@ -10,7 +10,7 @@ char* readUntil(FILE* src, int stop)
     int readChar;
 
     while((readChar = getc(src)) != EOF && readChar != stop) {
-        str = realloc(src, len + 2);
+        str = realloc(str, len + 2);
         FATAL(str, 1);
         str[len++] = readChar;
     }

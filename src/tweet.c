@@ -61,6 +61,8 @@ Tweet *ComposeTweet()
         FAIL_MSG(0, NULL, "Falha ao ler tweet!");
     }
 
+    getchar(); // Tira \n deixado pelo scanf
+
     printf("USER: ");
     tw->user = readUntil(stdin, '\n');
     printf("LANG: ");
