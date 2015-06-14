@@ -40,7 +40,7 @@ Database* CreateDatabase(const char* path)
     db->path = strdup(path);
 
     // Abre/cria o arquivo de dados
-    int fd = open(path, O_RDWR | O_CREAT);
+    int fd = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if(fd < 0) {
         free(db);
         FAIL(0, NULL);
@@ -55,8 +55,7 @@ Database* CreateDatabase(const char* path)
 
     // Lê o header
     if(fread(&(db->header), sizeof(DatabaseHeader), 1, db->dataFile) != 1) {
-        FreeDatabase(db);
-        FAIL(0, NULL);
+        DMSG("Não conseguiu ler o header. Assumindo que o arquivo está vazio!");
     }
 
     return db;
@@ -238,6 +237,5 @@ TweetSeq FindByUser(Database *db, const char *user)
             ++(tws.length);             // Ajusta o contador
         }
     }
-
     return tws;
 }

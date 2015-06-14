@@ -10,7 +10,7 @@ WARNINGS = -pedantic -Wall -Wextra -Wcast-align -Wcast-qual \
 	   -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wsign-conversion \
 	   -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused
 
-CFLAGS = $(WARNINGS) -std=gnu11
+CFLAGS = $(WARNINGS) -std=gnu11 -g
 
 CPPFLAGS = -D DEBUG
 
