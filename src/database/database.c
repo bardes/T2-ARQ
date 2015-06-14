@@ -100,9 +100,13 @@ int InsertTweet(Database* db, const Tweet* t)
 {
     fflush(db->dataFile); // Garante que o arquivo esta atualizado antes de inserir
 
+    // Acha a melhor posição vazia (se tiver)
     uint32_t prev, best;
     uint32_t len = (uint32_t) SizeOfTweet(t);
     uint32_t spaceLeft = GetBestFit(db, len, &prev, &best);
+
+    // Garante que o bit de deleção está ajustado corretamente
+    SET_BIT(t->flags, ACTIVE_BIT);
 
     if(best == INVALID) { // Inserção normal
         fseek(db->dataFile, 0, SEEK_END);
