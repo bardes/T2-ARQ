@@ -80,7 +80,7 @@ DatabaseItr* GetIterator(const Database* db)
     FATAL(fd > 0, 1);
 
     itr->data = fdopen(fd, "r");
-    FATAL(data, 1);
+    FATAL(itr->data, 1);
 
     // Pula o header
     fseek(itr->data, sizeof(DatabaseHeader), SEEK_CUR);
@@ -133,6 +133,8 @@ static uint32_t GetBestFit(Database *db, uint32_t size, uint32_t *p, uint32_t *b
 
 int InsertTweet(Database* db, const Tweet* t)
 {
+    if(!(t && db)) return -1;
+
     fflush(db->dataFile); // Garante que o arquivo esta atualizado antes de inserir
 
     // Acha a melhor posição vazia (se tiver)
@@ -222,26 +224,20 @@ size_t GetSize(const Database* db)
 
 TweetSeq FindByUser(Database *db, const char *user)
 {
-    Tweet *tw = NULL;
-    TweetSeq *tws = NULL;
-    int tweetlen, totaltws = 0;
+    TweetSeq tws;
+    tws.length = 0;
+    tws.seq = NULL;
 
-    tws = (TweetSeq*) malloc((totaltws+1)*sizeof(TweetSeq));
-
-    while(!feof(db->dataFile))   
-    {
-        tweetlen = ReadTweet(db->dataFile, tw);
-        
-        if(strcmp(user, tw->user)==0)
-        {
-            tws = (TweetSeq*) realloc(tws, (totaltws+1)*sizeof(TweetSeq));
-            tws[totaltws].seq = tw;
-            tws[totaltws].length = tweetlen;
-            ++totaltws;
+    Tweet tmp;
+    DatabaseItr *i = GetIterator(db);
+    while(GetNextTweet(i, &tmp) == 0) {     // Percorre todos os tweets ativos
+        if(strcmp(user, tmp.user) == 0) {   // Filtra apenas os com user desejado
+            tws.seq = realloc(tws.seq, tws.length + 1); // Aumenta o vetor
+            FATAL(tws.seq, 1);
+            tws.seq[tws.length] = tmp;  // Copia para o vetor
+            ++(tws.length);             // Ajusta o contador
         }
-        
     }
-    
-    tws = (TweetSeq*) realloc(tws, (totaltws)*sizeof(TweetSeq));
+
     return tws;
 }

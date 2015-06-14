@@ -74,7 +74,7 @@ Tweet *ComposeTweet()
         FAIL_MSG(0, NULL, "Falha ao ler tweet!");
 
     // Garante que o bit de deleção está ajustado corretamente
-    SET_BIT(t->flags, ACTIVE_BIT);
+    SET_BIT(tw->flags, ACTIVE_BIT);
 
     return tw;
 }
@@ -171,4 +171,9 @@ int WriteTweet(FILE *f, const Tweet *tw)
     FAIL_MSG(fputs(tw->language, f) != EOF, -1, "Falha ao escrever tweet!");
 
     return 0;
+}
+
+void PrintTweet(const Tweet* t)
+{
+    //TODO
 }

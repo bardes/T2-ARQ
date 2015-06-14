@@ -5,6 +5,7 @@
 
 #include "../utils.h"
 #include "../database/database.h"
+#include "../io.h"
 
 static char readOpt()
 {
@@ -29,27 +30,38 @@ static void printMenu()
         "V - Adicionar varios Tweets\n"
         "M - Mostrar todos os Tweets em ordem\n"
         "U - Buscar Tweets por USER\n"
-        "F - Buscar Tweets por FAVORITE_COUNT\n"
-        "L - Buscar Tweets por LANGUAGE\n"
-        "T - Buscar Tweets por FAVORITE_COUNT e LANGUAGE atraves do matching\n"
-        "G - Buscar Tweets por FAVORITE_COUNT e LANGUAGE atraves do merging\n"
-        "X - Apagar Tweet pelo FAVORITE_COUNT\n"
+        "f - Buscar Tweets por FAVORITE_COUNT\n"
+        "l - Buscar Tweets por LANGUAGE\n"
+        "t - Buscar Tweets por FAVORITE_COUNT e LANGUAGE (matching)\n"
+        "g - Buscar Tweets por FAVORITE_COUNT ou LANGUAGE (merging)\n"
+        "X - Apagar Tweet (FAVORITE_COUNT)\n"
         "Q - Sair\n\n\n"
     );
+}
+
+// TODO permitir ir e voltar
+static void ShowSeq(TweetSeq s)
+{
+    for(size_t i = 0; i < s.length; ++i) {
+        CLEAR();
+        printf("(%zu/%zu)\n", i+1, s.length);
+        PrintTweet(s.seq + i);
+        readOpt();
+    }
 }
 
 int main(int argc, char *argv[])
 {
     if(argc != 2) {
-        printf("Usage: %s <database>\n", argv[0]);
+        printf("Usage: %s <database_name>\n", argv[0]);
         return 1;
     }
 
-    Database *db = CreateDatabase("./", argv[1]);
+    Database *db = CreateDatabase(argv[1]);
     FAIL_MSG(db, 1, "Falha ao criar banco de dados!");
 
-    char exit = 0;
-    while(!exit) {
+    char exitFlag = 0;
+    while(!exitFlag) {
         char *uname;
         Tweet t, *result;
         size_t n;
@@ -61,11 +73,14 @@ int main(int argc, char *argv[])
         switch(readOpt()) {
             case 'a':
                 CLEAR();
-                t = composeTweet();
-                if(InsertTweet(db, &t) != 0)  {
-                    FAIL_MSG(0, 1, "Falha ao inserir Tweet!");
-                    readOpt();
+                if(InsertTweet(db, ComposeTweet()) != 0)  {
+                    CLEAR();
+                    printf("Não inseriu tweet!\n");
+                } else {
+                    CLEAR();
+                    printf("Tweet inserido com sucesso!\n");
                 }
+                readOpt();
             break;
 
             case 'v':
@@ -74,40 +89,38 @@ int main(int argc, char *argv[])
                 for(size_t i = 0; i < n; ++i) {
                     CLEAR();
                     printf("(%zu/%zu)\n", i+1, n);
-                    t = composeTweet();
-                    if(InsertTweet(db, &t) != 0) {
-                        FAIL_MSRG(0, 1, "Falha ao inserir Tweet!");
-                        readOpt();
-                    }
-                }
-            break;
-
-            case 'm':
-                DatabaseItr *itr = GetInterator(db);
-                n = GetSize(db);
-                for(size_t i = 0; i < n; ++i) {
-                    CLEAR();
-                    printf("(%zu/%zu)\n", i+1, n);
-                    if(GetNextTweet(itr, &t) == 0) {
-                        PrintTweet(&t);
+                    if(InsertTweet(db, ComposeTweet()) != 0)  {
+                        CLEAR();
+                        printf("Não inseriu tweet!\n");
                     } else {
-                        printf("==== APAGADO ====\n");
+                        CLEAR();
+                        printf("Tweet inserido com sucesso!\n");
                     }
                     readOpt();
                 }
             break;
 
-            case 'u':
-                printf("USER? ");
-                scanf("%s", uname);
-                if(FindByUser(db, uname) == 0 && n != 0) {
-                    for(size_t i = 0; i < n; ++i) {
+            case 'm':
+                n = GetSize(db);
+                if(n == 0) {
+                    printf("Banco de dados vazio!\n");
+                    readOpt();
+                } else {
+                    DatabaseItr *itr = GetIterator(db);
+                    FATAL_MSG(itr, 1, "Falha ao criar iterador!");
+                    for(size_t i = 0; GetNextTweet(itr, &t) == 0; ++i) {
                         CLEAR();
                         printf("(%zu/%zu)\n", i+1, n);
-                        printTweet(&result[i]);
-                        readOpt();
+                        PrintTweet(&t);
                     }
-                    free(result);
+                }
+            break;
+
+            case 'u':
+                printf("USER? "); uname = readUntil(stdin, '\n');
+                TweetSeq s = FindByUser(db, uname);
+                if(s.seq) {
+                    ShowSeq(s);
                 } else {
                     CLEAR();
                     printf("Nenhum Tweet com USER \"%s\" encontrado.\n", uname);
@@ -115,7 +128,7 @@ int main(int argc, char *argv[])
                 }
             break;
 
-            case 'f':
+            case 'f': /*
                 printf("FAVORITE_COUNT? ");
                 scanf("%zu", &n);
                 CLEAR();
@@ -178,7 +191,6 @@ int main(int argc, char *argv[])
                 readOpt();
                 break;
 
-
             case 'x':
                 printf("FAVORITE_COUNT? ");
                 scanf("%zu", &n);
@@ -190,10 +202,10 @@ int main(int argc, char *argv[])
                     printf("FAVORITE_COUNT Nao encontrado!\n");
                 readOpt();
                 readOpt();
-            break;
+            break;*/
 
             case 'q':
-                exit = 1;
+                exitFlag = 1;
             break;
 
             case '\n': break;
