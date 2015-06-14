@@ -9,13 +9,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define INVALID_OFFSET ((uint32_t)~0)
+#define INVALID ((uint32_t)~0)
 
 /**
  * Flags usados para guardar meta informações.
  */
 enum flags {
-	ACTIVE_BIT = 0 //! Bit usado para indicar remoção lógica.
+	ACTIVE_BIT = 0, //! Bit usado para indicar remoção lógica.
+	INVALID_BIT = 31
 };
 
 /**

@@ -23,52 +23,82 @@ Tweet *composeTweet()
 {
 }
 
+static Tweet *createTweet()
+{
+    // Aloca o tweet
+    Tweet *tw = malloc(sizeof(Tweet));
+    FAIL(tw, NULL);
+
+    // Inicializa os valores
+    tw->text = tw->user
+             = tw->coordinates
+             = tw->language = NULL;
+
+    tw->byteOffset = tw->favs
+                   = tw->flags
+                   = tw->nextFreeEntry
+                   = tw->retweets
+                   = tw->views = INVALID;
+
+}
+
 Tweet *readTweet(FILE *f)
 {
     uint32_t tweetLen;
 
-    // Aloca um tweet
-    Tweet *tw = malloc(sizeof(Tweet));
-    FAIL(tw, NULL);
-    tw->text = tw->user = tw->coordinates = tw->language = NULL;
+    // Aloca um tweet nulo
+    Tweet *tw = createTweet();
+    tw->byteOffset = (uint32_t) ftell(f);
 
+    // Le o tamanho do registro
     if(fread(&tweetLen, sizeof(uint32_t), 1, f) != 1) {
-        free(tw);
-        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
-    }
-
-    if(fread(&tw->flags, sizeof(int), 1, f) != 1) {
-        free(tw);
-        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
-    }
-
-    // Se estiver apagado lê apenas o "ponteiro" e avança a posição
-    if(GET_BIT(tw->flags, ACTIVE_BIT) == 0) {
-        fseek(f, (long) (tweetLen - 2 * sizeof(uint32_t)), SEEK_CUR);
-        return tw;
-    }
-
-    if(fread(&tw->favs, sizeof(int), 1, f) != 1) {
-        free(tw);
-        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
-    }
-    if(fread(&tw->views, sizeof(int), 1, f) != 1) {
-        free(tw);
-        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
-    }
-    if(fread(&tw->retweets, sizeof(int), 1, f) != 1) {
-        free(tw);
-        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
-    }
-
-    tw->text = readUntil(f, SEP);
-    tw->user = readUntil(f, SEP);
-    tw->coordinates = readUntil(f, SEP);
-    tw->language = readUntil(f, SEP);
-
-    if(!(tw->text && tw->user && tw->coordinates && tw->language)) {
         freeTweet(tw);
         FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+    }
+
+    // Le os flags
+    if(fread(&tw->flags, sizeof(int), 1, f) != 1) {
+        freeTweet(tw);
+        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+    }
+
+    // Se estiver apagado lê apenas o "ponteiro" e avança a posição do arquivo
+    if(GET_BIT(tw->flags, ACTIVE_BIT) == 0) {
+        if(fread(&tw->nextFreeEntry, sizeof(int), 1, f) != 1) {
+            freeTweet(tw);
+            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+        }
+        fseek(f, (long) (tweetLen - 2 * sizeof(uint32_t)), SEEK_CUR);
+    } else { // Senão continua lendo os outros campos
+        // Le a contagem de favoritos
+        if(fread(&tw->favs, sizeof(int), 1, f) != 1) {
+            freeTweet(tw);
+            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+        }
+
+        // Le a contagem de views
+        if(fread(&tw->views, sizeof(int), 1, f) != 1) {
+            freeTweet(tw);
+            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+        }
+
+        // Le a contagem de retweets
+        if(fread(&tw->retweets, sizeof(int), 1, f) != 1) {
+            freeTweet(tw);
+            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+        }
+
+        // Le os campos de tamanho variável
+        tw->text = readUntil(f, SEP);
+        tw->user = readUntil(f, SEP);
+        tw->coordinates = readUntil(f, SEP);
+        tw->language = readUntil(f, SEP);
+
+        // Verifica se não houve nenhuma falha
+        if(!(tw->text && tw->user && tw->coordinates && tw->language)) {
+            freeTweet(tw);
+            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+        }
     }
 
     return tw;
@@ -77,8 +107,13 @@ Tweet *readTweet(FILE *f)
 /**
  * Calcula o tamanho em disco de um tweet.
  */
-static size_t sizeOfTweet(Tweet tw)
+static size_t sizeOfTweet(const Tweet *tw)
 {
+    FAIL_MSG(GET_BIT(tw->flags, ACTIVE_BIT) == 1 &&
+             GET_BIT(tw->flags, INVALID_BIT) == 0, 0,
+             "Não é possível calcular o tamanho de um "
+             "tweet apagado ou inválido!");
+
     return 4 * sizeof(uint32_t) +
             + strlen(tw.text) + 1
             + strlen(tw.user) + 1
