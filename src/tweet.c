@@ -19,28 +19,55 @@ void FreeTweet(Tweet *t)
     free(t);
 }
 
-Tweet *ComposeTweet()
-{
-    return NULL;
-}
-
 Tweet *CreateTweet()
 {
     // Aloca o tweet
     Tweet *tw = malloc(sizeof(Tweet));
     FAIL(tw, NULL);
-
+    
     // Inicializa os valores
     tw->text = tw->user
-             = tw->coordinates
-             = tw->language = NULL;
-
+    = tw->coordinates
+    = tw->language = NULL;
+    
     tw->byteOffset = tw->favs
-                   = tw->flags
-                   = tw->nextFreeEntry
-                   = tw->retweets
-                   = tw->views = INVALID;
+    = tw->flags
+    = tw->nextFreeEntry
+    = tw->retweets
+    = tw->views = INVALID;
+    
+    return tw;
+}
 
+Tweet *ComposeTweet()
+{
+    
+    Tweet *tw = CreateTweet();
+    
+    printf("VIEWS: ");
+    if(scanf(" %u", &(tw->views)) == EOF)
+        FAIL_MSG(0, -1, "Falha ao ler tweet!");
+    
+    printf("RETWEETS: ");
+    if(scanf(" %u", &(tw->retweets)) == EOF)
+        FAIL_MSG(0, -1, "Falha ao ler tweet!");
+    
+    printf("FAVORITES: ");
+    if(scanf(" %u", &(tw->favs)) == EOF)
+        FAIL_MSG(0, -1, "Falha ao ler tweet!");
+    
+    printf("USER: ");
+    tw->user = readUntil(stdin, SEP);
+    printf("LANG: ");
+    tw->language = readUntil(stdin, SEP);
+    printf("COORDINATES: ");
+    tw->coordinates = readUntil(stdin, SEP);
+    printf("TEXT: (CTRL+D para terminar)\n");
+    tw->text = readUntil(stdin, SEP);
+    
+    if(!(tw->text && tw->user && tw->coordinates && tw->language))
+        FAIL_MSG(0, -1, "Falha ao ler tweet!");
+    
     return tw;
 }
 
@@ -137,30 +164,3 @@ int WriteTweet(FILE *f, const Tweet *tw)
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
