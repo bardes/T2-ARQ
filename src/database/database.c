@@ -219,3 +219,29 @@ size_t GetSize(const Database* db)
 {
     return db->header.activeCounter;
 }
+
+TweetSeq FindByUser(Database *db, const char *user)
+{
+    Tweet *tw = NULL;
+    TweetSeq *tws = NULL;
+    int tweetlen, totaltws = 0;
+
+    tws = (TweetSeq*) malloc((totaltws+1)*sizeof(TweetSeq));
+
+    while(!feof(db->dataFile))   
+    {
+        tweetlen = ReadTweet(db->dataFile, tw);
+        
+        if(strcmp(user, tw->user)==0)
+        {
+            tws = (TweetSeq*) realloc(tws, (totaltws+1)*sizeof(TweetSeq));
+            tws[totaltws].seq = tw;
+            tws[totaltws].length = tweetlen;
+            ++totaltws;
+        }
+        
+    }
+    
+    tws = (TweetSeq*) realloc(tws, (totaltws)*sizeof(TweetSeq));
+    return tws;
+}
