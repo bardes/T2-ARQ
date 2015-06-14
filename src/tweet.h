@@ -15,8 +15,8 @@
  * Flags usados para guardar meta informações.
  */
 enum flags {
-	ACTIVE_BIT = 0, //! Bit usado para indicar remoção lógica.
-	INVALID_BIT = 31
+    ACTIVE_BIT = 0,     //! Bit usado para indicar remoção lógica.
+    INVALID_BIT = 1,    //! Bit usado para indicar tweets inválidos
 };
 
 /**
@@ -41,30 +41,36 @@ typedef struct {
 } TweetSeq;
 
 /**
+ * Cria um tweet nulo.
+ */
+Tweet *CreateTweet();
+
+/**
  * Libera o tweet da memória.
  */
-void freeTweet(Tweet *t);
+void FreeTweet(Tweet *t);
 
 /**
  * Cria um tweet de maneira interativa, usando a entrada padrão.
  *
  * \return Ponteiro para o novo tweet ou NULL em caso de falha.
  */
-Tweet *composeTweet();
+Tweet *ComposeTweet();
 
 /**
  * Imprime o tweet dado na saida padrão.
  */
-void printTweet(const Tweet *t);
+void PrintTweet(const Tweet *t);
 
 /**
  * Tenta ler um tweet à partir da posição atual do arquivo dado.
  *
  * \param f Arquivo a ser lido.
+ * \param tw Tweet onde serão escritos os dados.
  *
- * \return Ponteiro para o tweet lido, ou NULL em caso de falha.
+ * \return Tamanho em disco do tweet lido.
  */
-Tweet *readTweet(FILE *f);
+int *ReadTweet(FILE *f, Tweet *tw);
 
 /**
  * Tenta escreveer o tweet no arquivo dado.
@@ -73,6 +79,6 @@ Tweet *readTweet(FILE *f);
  *
  * \return 0 em caso de sucesso, < 0 em caso de erros.
  */
-int writeTweet(FILE *f, Tweet tw);
+int WriteTweet(FILE *f, const Tweet tw);
 
 #endif /* _TWEET_H_ */

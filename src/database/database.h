@@ -45,10 +45,8 @@ int InsertTweet(Database *db, const Tweet *t);
 size_t GetSize(const Database *db);
 
 /**
- * Remove um tweet.
- *
- * ???
+ * Remove um tweet com base em seu byte offset.
  */
-//int RemoveTweet(Database *db);
+int RemoveTweet(Database *db, uint32_t offset);
 
 #endif /* _DATABASE_H_ */
