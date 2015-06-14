@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         switch(readOpt()) {
             case 'a':
                 CLEAR();
-                readTweet(&t);
+                t = composeTweet();
                 if(InsertTweet(db, &t) != 0)  {
                     FAIL_MSG(0, 1, "Falha ao inserir Tweet!");
                     readOpt();
@@ -74,21 +74,22 @@ int main(int argc, char *argv[])
                 for(size_t i = 0; i < n; ++i) {
                     CLEAR();
                     printf("(%zu/%zu)\n", i+1, n);
-                    readTweet(&t);
+                    t = composeTweet();
                     if(InsertTweet(db, &t) != 0) {
-                        FAIL_MSG(0, 1, "Falha ao inserir Tweet!");
+                        FAIL_MSRG(0, 1, "Falha ao inserir Tweet!");
                         readOpt();
                     }
                 }
             break;
 
             case 'm':
+                DatabaseItr *itr = GetInterator(db);
                 n = GetSize(db);
                 for(size_t i = 0; i < n; ++i) {
                     CLEAR();
                     printf("(%zu/%zu)\n", i+1, n);
-                    if(GetTweet(db, i, &t) == 0) {
-                        printTweet(&t);
+                    if(GetNextTweet(itr, &t) == 0) {
+                        PrintTweet(&t);
                     } else {
                         printf("==== APAGADO ====\n");
                     }
@@ -98,8 +99,8 @@ int main(int argc, char *argv[])
 
             case 'u':
                 printf("USER? ");
-                readUntil(uname, TW_USER_LEN, '\n');
-                if(GetTweetsByUser(db, uname, &result, &n) == 0 && n != 0) {
+                scanf("%s", uname);
+                if(FindByUser(db, uname) == 0 && n != 0) {
                     for(size_t i = 0; i < n; ++i) {
                         CLEAR();
                         printf("(%zu/%zu)\n", i+1, n);
