@@ -60,6 +60,11 @@ TweetSeq FindByUser(Database *db, const char *user);
 DatabaseItr *GetIterator(const Database *db);
 
 /**
+ * Libera um iterador da memória.
+ */
+void FreeIterator(DatabaseItr *itr);
+
+/**
  * Lê o próximo tweet do iterador.
  *
  * \return 0 quando lê com sucesso, -1 quando acabar.

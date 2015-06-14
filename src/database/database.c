@@ -4,6 +4,7 @@
 
 #include <fcntl.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "../io.h"
 #include "../utils.h"
@@ -25,6 +26,10 @@ struct _Database_t {
     DatabaseHeader header;
     FILE *dataFile;
     char *path;
+};
+
+struct _DatabaseItr_t {
+    FILE *data;
 };
 
 Database* CreateDatabase(const char* path)
@@ -64,6 +69,31 @@ void FreeDatabase(Database* db)
     fclose(db->dataFile);
     free(db->path);
     free(db);
+}
+
+DatabaseItr* GetIterator(const Database* db)
+{
+    DatabaseItr *itr = malloc(sizeof(DatabaseItr));
+    FATAL(itr, 1);
+
+    int fd = dup(fileno(db->dataFile));
+    FATAL(fd > 0, 1);
+
+    itr->data = fdopen(fd, "r");
+    FATAL(data, 1);
+
+    // Pula o header
+    fseek(itr->data, sizeof(DatabaseHeader), SEEK_CUR);
+    return itr;
+}
+
+int GetNextTweet(DatabaseItr* itr, Tweet* dest)
+{
+    do {
+        if(ReadTweet(itr->data, dest) < 0) return -1;
+    } while(GET_BIT(dest->flags, ACTIVE_BIT) == 0);
+
+    return 0;
 }
 
 static uint32_t GetBestFit(Database *db, uint32_t size, uint32_t *p, uint32_t *b)
