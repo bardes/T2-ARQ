@@ -175,5 +175,12 @@ int WriteTweet(FILE *f, const Tweet *tw)
 
 void PrintTweet(const Tweet* t)
 {
-    //TODO
+    printf("--------------------------- Info ---------------------------\n");
+    printf("VIEWS: %-10u RETWEETS: %-10u FAVORITES: %-10u\n", t->views,
+           t->retweets, t->favs);
+    printf("LANG: %-8s COORDINATES: %s\n", t->language, t->coordinates);
+    printf("USER: %s\n", t->user);
+    printf("--------------------------- Text ---------------------------\n");
+    printf("%s\n", t->text);
+    printf("--------------------------- END ---------------------------\n");
 }
