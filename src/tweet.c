@@ -21,6 +21,7 @@ void FreeTweet(Tweet *t)
 
 Tweet *ComposeTweet()
 {
+    return NULL;
 }
 
 Tweet *CreateTweet()
@@ -40,47 +41,47 @@ Tweet *CreateTweet()
                    = tw->retweets
                    = tw->views = INVALID;
 
+    return tw;
 }
 
 int ReadTweet(FILE *f, Tweet *tw)
 {
     uint32_t tweetLen;
 
-    // Aloca um tweet nulo
-    Tweet *tw = CreateTweet();
+    // Grava o byte offset para identificar unicamente esse tweet
     tw->byteOffset = (uint32_t) ftell(f);
 
     // Le o tamanho do registro
     if(fread(&tweetLen, sizeof(uint32_t), 1, f) != 1) {
-        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+        FAIL_MSG(0, -1, "Falha ao ler tweet!");
     }
 
     // Le os flags
     if(fread(&tw->flags, sizeof(int), 1, f) != 1) {
-        FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+        FAIL_MSG(0, -1, "Falha ao ler tweet!");
     }
 
     // Se estiver apagado lê apenas o "ponteiro" e avança a posição do arquivo
     if(GET_BIT(tw->flags, ACTIVE_BIT) == 0) {
         // Le o byte offset do proximo registro livre
         if(fread(&tw->nextFreeEntry, sizeof(int), 1, f) != 1) {
-            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+            FAIL_MSG(0, -1, "Falha ao ler tweet!");
         }
         fseek(f, (long) (tweetLen - 2 * sizeof(uint32_t)), SEEK_CUR);
     } else { // Senão continua lendo os outros campos
         // Le a contagem de favoritos
         if(fread(&tw->favs, sizeof(int), 1, f) != 1) {
-            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+            FAIL_MSG(0, -1, "Falha ao ler tweet!");
         }
 
         // Le a contagem de views
         if(fread(&tw->views, sizeof(int), 1, f) != 1) {
-            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+            FAIL_MSG(0, -1, "Falha ao ler tweet!");
         }
 
         // Le a contagem de retweets
         if(fread(&tw->retweets, sizeof(int), 1, f) != 1) {
-            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+            FAIL_MSG(0, -1, "Falha ao ler tweet!");
         }
 
         // Le os campos de tamanho variável
@@ -91,23 +92,20 @@ int ReadTweet(FILE *f, Tweet *tw)
 
         // Verifica se não houve nenhuma falha
         if(!(tw->text && tw->user && tw->coordinates && tw->language)) {
-            FAIL_MSG(0, NULL, "Falha ao ler tweet!");
+            FAIL_MSG(0, -1, "Falha ao ler tweet!");
         }
     }
 
-    return tweetLen;
+    return (int) tweetLen;
 }
 
-/**
- * Calcula o tamanho em disco de um tweet.
- */
-static size_t SizeOfTweet(const Tweet *tw)
+size_t SizeOfTweet(const Tweet *tw)
 {
     return 4 * sizeof(uint32_t) +
-            + strlen(tw.text) + 1
-            + strlen(tw.user) + 1
-            + strlen(tw.coordinates) + 1
-            + strlen(tw.language) + 1;
+            + strlen(tw->text) + 1
+            + strlen(tw->user) + 1
+            + strlen(tw->coordinates) + 1
+            + strlen(tw->language) + 1;
 }
 
 int WriteTweet(FILE *f, const Tweet *tw)

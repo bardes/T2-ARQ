@@ -27,7 +27,7 @@ typedef struct _Database_t Database;
  *
  * \return NULL em caso de falha.
  */
-Database *CreateDatabase(const char *path, const char *name);
+Database *CreateDatabase(const char *path);
 
 /**
  * Fecha e libera o banco de dados da memória (RAM).

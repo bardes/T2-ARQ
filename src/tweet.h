@@ -9,15 +9,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define INVALID ((uint32_t)~0)
+#define INVALID ((uint32_t)~0) // Offset reservado para indica posição inválida
 
-/**
- * Flags usados para guardar meta informações.
- */
-enum flags {
-    ACTIVE_BIT = 0,     //! Bit usado para indicar remoção lógica.
-    INVALID_BIT = 1,    //! Bit usado para indicar tweets inválidos
-};
+#define ACTIVE_BIT 0 // Bit dos flags para indicar deleção lógica
 
 /**
  * Estrutura de dado usada para represntar um tweet.
@@ -68,17 +62,23 @@ void PrintTweet(const Tweet *t);
  * \param f Arquivo a ser lido.
  * \param tw Tweet onde serão escritos os dados.
  *
- * \return Tamanho em disco do tweet lido.
+ * \return Tamanho em disco do tweet lido. ou < 0 em caso de falhas.
  */
-int *ReadTweet(FILE *f, Tweet *tw);
+int ReadTweet(FILE *f, Tweet *tw);
 
 /**
  * Tenta escreveer o tweet no arquivo dado.
  *
  * \param f Arquivo de destino.
+ * \param tw Tweet a ser escrito
  *
  * \return 0 em caso de sucesso, < 0 em caso de erros.
  */
-int WriteTweet(FILE *f, const Tweet tw);
+int WriteTweet(FILE *f, const Tweet *tw);
+
+/**
+ * Calcula o tamanho em disco de um tweet.
+ */
+size_t SizeOfTweet(const Tweet *tw);
 
 #endif /* _TWEET_H_ */
