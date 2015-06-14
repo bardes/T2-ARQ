@@ -224,11 +224,9 @@ TweetSeq FindByUser(Database *db, const char *user)
 {
     Tweet *tw = NULL;
     TweetSeq *tws = NULL;
-    int tweetlen;
+    int tweetlen, totaltws = 0;
 
-    tws = (TweetSeq*) malloc(sizeof(TweetSeq));
-    tws->seq = (char*) malloc(sizeof(char));
-    tws->length = 0;
+    tws = (TweetSeq*) malloc((totaltws+1)*sizeof(TweetSeq));
 
     while(!feof(db->dataFile))   
     {
@@ -236,28 +234,14 @@ TweetSeq FindByUser(Database *db, const char *user)
         
         if(strcmp(user, tw->user)==0)
         {
-            tws->seq = (char*) realloc(tws->seq, (tweetlen+1)*sizeof(char));
-            
-            tws->seq = strcat(tws->seq, tw->views);
-            tws->seq = strcat(tws->seq, ",");
-            tws->seq = strcat(tws->seq, tw->retweets);
-            tws->seq = strcat(tws->seq, ",");
-            tws->seq = strcat(tws->seq, tw->favs);
-            tws->seq = strcat(tws->seq, ",");
-            tws->seq = strcat(tws->seq, tw->user);
-            tws->seq = strcat(tws->seq, ",");
-            tws->seq = strcat(tws->seq, tw->language);
-            tws->seq = strcat(tws->seq, ",");
-            tws->seq = strcat(tws->seq, tw->coordinates);
-            tws->seq = strcat(tws->seq, ",");
-            tws->seq = strcat(tws->seq, tw->text);
-            tws->seq = strcat(tws->seq, ",");
-            
-            tws->length += tweetlen;
-            
+            tws = (TweetSeq*) realloc(tws, (totaltws+1)*sizeof(TweetSeq));
+            tws[totaltws].seq = tw;
+            tws[totaltws].length = tweetlen;
+            ++totaltws;
         }
         
     }
     
+    tws = (TweetSeq*) realloc(tws, (totaltws)*sizeof(TweetSeq));
     return tws;
 }
