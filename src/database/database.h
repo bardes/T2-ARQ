@@ -1,3 +1,9 @@
+/* Grupo: 2
+ * Ana Caroline Fernandes Spengler 8532356
+ * Paulo Bardes                    8531932
+ * Renato Goto                     8516692
+*/
+
 /**
  * Este arquivo define todas as funções necessárias para interagir com o
  * banco de dados. Salvo casos onde os comentários indicam um comportamento

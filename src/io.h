@@ -1,3 +1,9 @@
+/* Grupo: 2
+ * Ana Caroline Fernandes Spengler 8532356
+ * Paulo Bardes                    8531932
+ * Renato Goto                     8516692
+*/
+
 #ifndef _IO_H_
 #define _IO_H_
 
