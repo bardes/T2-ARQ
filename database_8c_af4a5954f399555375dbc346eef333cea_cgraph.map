@@ -1,0 +1,8 @@
+<map id="FindByUser" name="FindByUser">
+<area shape="rect" id="node2" href="$database_8c.html#ac10489a20fcaa482bbf86339fd888c5e" title="GetIterator" alt="" coords="156,5,248,32"/>
+<area shape="rect" id="node3" href="$database_8c.html#abc283ccb01030a2afbdf2792ddfbb693" title="GetNextTweet" alt="" coords="147,56,257,83"/>
+<area shape="rect" id="node6" href="$tweet_8c.html#aa4b93f12c7823d78de4dca8844bcfd34" title="FreeTweet" alt="" coords="160,107,244,133"/>
+<area shape="rect" id="node7" href="$database_8c.html#ad19c5a0a9d62022ced1caf25256c31ec" title="FreeIterator" alt="" coords="154,157,250,184"/>
+<area shape="rect" id="node4" href="$tweet_8c.html#accc83b26fe0aa84a63c7c7b549df4239" title="ReadTweet" alt="" coords="305,56,393,83"/>
+<area shape="rect" id="node5" href="$io_8c.html#a7f17ce41ddb77a8c3bb44b87a68798b4" title="readUntil" alt="" coords="441,56,521,83"/>
+</map>
