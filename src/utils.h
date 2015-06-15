@@ -37,6 +37,6 @@ fprintf(stderr, __VA_ARGS__);fputc('\n', stderr);}while(0)
 #define SET_BIT(x, y) do {x |= 1 << y;} while(0)
 #define CLEAR_BIT(x, y) do {x &= ~(1U << y);} while(0)
 #define TOGGLE_BIT(x, y) do {x ^= 1 << y;} while(0)
-#define GET_BIT(x, y) ((x & 1 << y) >> y)
+#define GET_BIT(x, y) ((x & (1 << y)) >> y)
 
 #endif /* __UTILS_H__ */

@@ -46,7 +46,7 @@ static void ShowSeq(TweetSeq s)
         CLEAR();
         printf("(%zu/%zu)\n", i+1, s.length);
         PrintTweet(s.seq + i);
-        readOpt();
+        if(readOpt() == 'q') return;
     }
 }
 
@@ -111,9 +111,9 @@ int main(int argc, char *argv[])
                     FATAL_MSG(itr, 1, "Falha ao criar iterador!");
                     for(size_t i = 0; GetNextTweet(itr, &t) == 0; ++i) {
                         CLEAR();
-                        printf("(%zu/%zu)\n", i+1, n);
+                        printf("(%zu/%zu) (Offset: 0x%08X)\n", i+1, n, t.byteOffset);
                         PrintTweet(&t);
-                        readOpt();
+                        if(readOpt() == 'q') break;
                     }
                     FreeIterator(itr);
                 }
@@ -194,20 +194,19 @@ int main(int argc, char *argv[])
                 }
                 readOpt();
                 readOpt();
-                break;
+                break;*/
 
             case 'x':
-                printf("FAVORITE_COUNT? ");
-                scanf("%zu", &n);
+                printf("OFFSET? ");
+                scanf(" %i", (int*) &n); fgetc(stdin);
                 CLEAR();
-                if()
-                {
+                if(RemoveTweet(db, (uint32_t) n)) {
+                    printf("Falha ao remover tweet.\n");
+                } else {
+                    printf("Tweet removido com sucesso.\n");
                 }
-                else
-                    printf("FAVORITE_COUNT Nao encontrado!\n");
                 readOpt();
-                readOpt();
-            break;*/
+            break;
 
             case 'q':
                 exitFlag = 1;

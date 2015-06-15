@@ -142,6 +142,10 @@ int ReadTweet(FILE *f, Tweet *tw)
         }
     }
 
+    // Garante que está numa posição válida após terminar a leitura.
+    // pois alguns tweets possuem fragmentação interna.
+    fseek(f, tw->byteOffset + tweetLen + 4, SEEK_SET);
+    
     return (int) tweetLen;
 }
 
