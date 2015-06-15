@@ -16,7 +16,13 @@ void FreeTweet(Tweet *t)
     free(t->user);
     free(t->language);
     free(t->coordinates);
-    free(t);
+}
+
+void FreeTweetSeq(TweetSeq ts)
+{
+    for(size_t i = 0; i < ts.length; ++i)
+        FreeTweet(ts.seq + i);
+    free(ts.seq);
 }
 
 Tweet *CreateTweet()
@@ -90,7 +96,10 @@ int ReadTweet(FILE *f, Tweet *tw)
 
     // Le o tamanho do registro
     if(fread(&tweetLen, sizeof(uint32_t), 1, f) != 1) {
-        FAIL_MSG(0, -1, "Falha ao ler tweet!");
+        if(feof(f))
+            return -2;
+        else
+            FAIL_MSG(0, -1, "Falha ao ler tweet!");
     }
 
     // Le os flags
@@ -148,7 +157,10 @@ size_t SizeOfTweet(const Tweet *tw)
 int WriteTweet(FILE *f, const Tweet *tw)
 {
     // Não escreve tweets apagados
-    if(GET_BIT(tw->flags, ACTIVE_BIT) == 0) return -1;
+    if(GET_BIT(tw->flags, ACTIVE_BIT) == 0) {
+        DMSG("Tweet apagado não foi escrito!");
+        return -1;
+    }
 
     uint32_t twSize = (uint32_t) SizeOfTweet(tw);
 
@@ -168,9 +180,13 @@ int WriteTweet(FILE *f, const Tweet *tw)
 
     // E agora os de tamanho variável, separados por '\0's
     FAIL_MSG(fputs(tw->text, f) != EOF, -1, "Falha ao escrever tweet!");
+    fputc(SEP, f);
     FAIL_MSG(fputs(tw->user, f) != EOF, -1, "Falha ao escrever tweet!");
+    fputc(SEP, f);
     FAIL_MSG(fputs(tw->coordinates, f) != EOF, -1, "Falha ao escrever tweet!");
+    fputc(SEP, f);
     FAIL_MSG(fputs(tw->language, f) != EOF, -1, "Falha ao escrever tweet!");
+    fputc(SEP, f);
 
     return 0;
 }
@@ -180,9 +196,9 @@ void PrintTweet(const Tweet* t)
     printf("--------------------------- Info ---------------------------\n");
     printf("VIEWS: %-10u RETWEETS: %-10u FAVORITES: %-10u\n", t->views,
            t->retweets, t->favs);
-    printf("LANG: %-8s COORDINATES: %s\n", t->language, t->coordinates);
-    printf("USER: %s\n", t->user);
+    printf("USER: %-32s LANG: %s\n", t->user, t->language);
+    printf("COORDINATES: %s\n", t->coordinates);
     printf("--------------------------- Text ---------------------------\n");
     printf("%s\n", t->text);
-    printf("--------------------------- END ---------------------------\n");
+    printf("------------------------------------------------------------\n");
 }

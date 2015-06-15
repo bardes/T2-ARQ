@@ -40,9 +40,17 @@ typedef struct {
 Tweet *CreateTweet();
 
 /**
- * Libera o tweet da memória.
+ * Libera os dados de um tweet da memória.
+ *
+ * **AVISO:** Essa funções não libera o ponteiro t. Se a estrutura Tweet foi
+ * alocada dinamicamente ainda é necessário chamar free(t) após FreeTweet(t).
  */
 void FreeTweet(Tweet *t);
+
+/**
+ * Libera o contudo de uma TweetSeq da memória.
+ */
+void FreeTweetSeq(TweetSeq ts);
 
 /**
  * Cria um tweet de maneira interativa, usando a entrada padrão.

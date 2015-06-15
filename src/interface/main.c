@@ -113,7 +113,9 @@ int main(int argc, char *argv[])
                         CLEAR();
                         printf("(%zu/%zu)\n", i+1, n);
                         PrintTweet(&t);
+                        readOpt();
                     }
+                    FreeIterator(itr);
                 }
             break;
 
@@ -127,6 +129,8 @@ int main(int argc, char *argv[])
                     printf("Nenhum Tweet com USER \"%s\" encontrado.\n", uname);
                     readOpt();
                 }
+                free(uname);
+                FreeTweetSeq(s);
             break;
 
             case 'f': /*

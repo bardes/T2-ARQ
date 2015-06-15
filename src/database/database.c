@@ -55,9 +55,11 @@ Database* CreateDatabase(const char* path)
 
     // Lê o header
     if(fread(&(db->header), sizeof(DatabaseHeader), 1, db->dataFile) != 1) {
-        DMSG("Não conseguiu ler o header. Assumindo que o arquivo está vazio!");
+        DMSG("Não conseguiu ler o header. Arquivo sera truncado!");
         db->header.activeCounter = 0;
         db->header.queueEnd = db->header.queueHead = INVALID;
+        ftruncate(fd, 0);
+        fwrite(&(db->header), sizeof(DatabaseHeader), 1, db->dataFile);
     }
 
     return db;
@@ -75,6 +77,8 @@ void FreeDatabase(Database* db)
 
 DatabaseItr* GetIterator(const Database* db)
 {
+    fflush(db->dataFile);
+
     DatabaseItr *itr = malloc(sizeof(DatabaseItr));
     FATAL(itr, 1);
 
@@ -85,8 +89,15 @@ DatabaseItr* GetIterator(const Database* db)
     FATAL(itr->data, 1);
 
     // Pula o header
-    fseek(itr->data, sizeof(DatabaseHeader), SEEK_CUR);
+    fseek(itr->data, sizeof(DatabaseHeader), SEEK_SET);
+    DMSG("Criado iterador. (pos: %ld)", ftell(itr->data));
     return itr;
+}
+
+void FreeIterator(DatabaseItr* itr)
+{
+    fclose(itr->data);
+    free(itr);
 }
 
 int GetNextTweet(DatabaseItr* itr, Tweet* dest)
@@ -146,7 +157,7 @@ int InsertTweet(Database* db, const Tweet* t)
 
     if(best == INVALID) { // Inserção normal
         fseek(db->dataFile, 0, SEEK_END);
-        return WriteTweet(db->dataFile, t);
+        if(WriteTweet(db->dataFile, t) != 0) return -1;
     } else { // Reaproveita espaço
         // Lê o offset do proximo apagado
         uint32_t next;
@@ -234,11 +245,15 @@ TweetSeq FindByUser(Database *db, const char *user)
     DatabaseItr *i = GetIterator(db);
     while(GetNextTweet(i, &tmp) == 0) {     // Percorre todos os tweets ativos
         if(strcmp(user, tmp.user) == 0) {   // Filtra apenas os com user desejado
-            tws.seq = realloc(tws.seq, tws.length + 1); // Aumenta o vetor
+            tws.seq = realloc(tws.seq, (tws.length + 1) * sizeof(Tweet)); // Aumenta o vetor
             FATAL(tws.seq, 1);
-            tws.seq[tws.length] = tmp;  // Copia para o vetor
+            memcpy(tws.seq + tws.length, &tmp, sizeof(Tweet));
+            //tws.seq[tws.length] = tmp;  // Copia para o vetor
             ++(tws.length);             // Ajusta o contador
+        } else {
+            FreeTweet(&tmp);
         }
     }
+    FreeIterator(i);
     return tws;
 }
