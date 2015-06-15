@@ -56,6 +56,8 @@ Database* CreateDatabase(const char* path)
     // Lê o header
     if(fread(&(db->header), sizeof(DatabaseHeader), 1, db->dataFile) != 1) {
         DMSG("Não conseguiu ler o header. Assumindo que o arquivo está vazio!");
+        db->header.activeCounter = 0;
+        db->header.queueEnd = db->header.queueHead = INVALID;
     }
 
     return db;
@@ -64,6 +66,7 @@ Database* CreateDatabase(const char* path)
 void FreeDatabase(Database* db)
 {
     // Escreve o header antes de fechar o arquivo
+    fseek(db->dataFile, 0, SEEK_SET);
     fwrite(&(db->header), sizeof(DatabaseHeader), 1, db->dataFile);
     fclose(db->dataFile);
     free(db->path);

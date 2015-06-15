@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
             case 'm':
                 n = GetSize(db);
                 if(n == 0) {
+                    CLEAR();
                     printf("Banco de dados vazio!\n");
                     readOpt();
                 } else {
