@@ -55,6 +55,11 @@ int RemoveTweet(Database *db, uint32_t offset);
 TweetSeq FindByUser(Database *db, const char *user);
 
 /**
+ * Acha todos os tweets com uma certa quantidade de FAVs.
+ */
+TweetSeq FindByFav(Database *db, uint32_t favs);
+
+/**
  * Pega um iterador para percorrer todos os tweets do DB.
  */
 DatabaseItr *GetIterator(const Database *db);

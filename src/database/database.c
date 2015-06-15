@@ -255,6 +255,7 @@ int InsertTweet(Database* db, const Tweet* t)
 
 int RemoveTweet(Database* db, uint32_t offset)
 {
+    if(offset == INVALID) return 1;
     DMSG("Deletendo registro no offset: 0x%08X", offset);
     // Posiciona no registro a ser removido
     FAIL(fseek(db->dataFile, offset, SEEK_SET) == 0, -1);
@@ -314,8 +315,29 @@ TweetSeq FindByUser(Database *db, const char *user)
         if(strcmp(user, tmp.user) == 0) {   // Filtra apenas os com user desejado
             tws.seq = realloc(tws.seq, (tws.length + 1) * sizeof(Tweet)); // Aumenta o vetor
             FATAL(tws.seq, 1);
-            memcpy(tws.seq + tws.length, &tmp, sizeof(Tweet));
-            //tws.seq[tws.length] = tmp;  // Copia para o vetor
+            tws.seq[tws.length] = tmp;  // Copia para o vetor
+            ++(tws.length);             // Ajusta o contador
+        } else {
+            FreeTweet(&tmp);
+        }
+    }
+    FreeIterator(i);
+    return tws;
+}
+
+TweetSeq FindByFav(Database* db, uint32_t favs)
+{
+    TweetSeq tws;
+    tws.length = 0;
+    tws.seq = NULL;
+
+    Tweet tmp;
+    DatabaseItr *i = GetIterator(db);
+    while(GetNextTweet(i, &tmp) == 0) { // Percorre todos os tweets ativos
+        if(tmp.favs == favs) {          // Filtra pela qtd. de FAVs
+            tws.seq = realloc(tws.seq, (tws.length + 1) * sizeof(Tweet)); // Aumenta o vetor
+            FATAL(tws.seq, 1);
+            tws.seq[tws.length] = tmp;  // Copia para o vetor
             ++(tws.length);             // Ajusta o contador
         } else {
             FreeTweet(&tmp);

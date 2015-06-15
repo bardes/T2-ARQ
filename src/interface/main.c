@@ -30,7 +30,7 @@ static void printMenu()
         "V - Adicionar varios Tweets\n"
         "M - Mostrar todos os Tweets em ordem\n"
         "U - Buscar Tweets por USER\n"
-        "f - Buscar Tweets por FAVORITE_COUNT\n"
+        "F - Buscar Tweets por FAVORITE_COUNT\n"
         "l - Buscar Tweets por LANGUAGE\n"
         "t - Buscar Tweets por FAVORITE_COUNT e LANGUAGE (matching)\n"
         "g - Buscar Tweets por FAVORITE_COUNT ou LANGUAGE (merging)\n"
@@ -42,11 +42,43 @@ static void printMenu()
 // TODO permitir ir e voltar
 static void ShowSeq(TweetSeq s)
 {
-    for(size_t i = 0; i < s.length; ++i) {
+    size_t i = 0;
+    for(;;) {
         CLEAR();
         printf("(%zu/%zu)\n", i+1, s.length);
         PrintTweet(s.seq + i);
-        if(readOpt() == 'q') return;
+        printf("pressione <enter> para avançar.\n");
+        printf("    'v' + <enter> para voltar.\n");
+        printf("    'q' + <enter> para voltar ao menu.\n");
+
+        switch(readOpt())
+        {
+            case 'v': i = i == 0 ? s.length - 1 : i - 1; break;
+            case 'q': return;
+            default: ++i; i %= s.length;;
+        }
+    }
+}
+
+static uint32_t ChooseSeq(TweetSeq s)
+{
+    size_t i = 0;
+    for(;;) {
+        CLEAR();
+        printf("(%zu/%zu)\n", i+1, s.length);
+        PrintTweet(s.seq + i);
+        printf("\n\n\nOpções:\n\t    'x' - apagar.\n");
+        printf("\t    'q' - volta sem apagar.\n");
+        printf("\t<enter> - volta sem apagar.\n");
+        printf("\n\nEscolha: ");
+        switch(readOpt())
+        {
+            case 'x': return s.seq[i].byteOffset;
+            case 'q': return INVALID;
+            default: break;
+        }
+
+        ++i; i %= s.length;
     }
 }
 
@@ -63,9 +95,9 @@ int main(int argc, char *argv[])
     char exitFlag = 0;
     while(!exitFlag) {
         char *uname;
-        Tweet t, *result;
+        Tweet t;
         size_t n;
-        char *language;
+        TweetSeq s;
 
         printMenu();
         printf("Escolha: ");
@@ -85,7 +117,7 @@ int main(int argc, char *argv[])
 
             case 'v':
                 printf("Quantos? ");
-                scanf("%zu", &n);
+                scanf("%zu", &n); fgetc(stdin);
                 for(size_t i = 0; i < n; ++i) {
                     CLEAR();
                     printf("(%zu/%zu)\n", i+1, n);
@@ -113,6 +145,7 @@ int main(int argc, char *argv[])
                         CLEAR();
                         printf("(%zu/%zu) (Offset: 0x%08X)\n", i+1, n, t.byteOffset);
                         PrintTweet(&t);
+                        printf("\nPressione <enter> para Avançar...");
                         if(readOpt() == 'q') break;
                     }
                     FreeIterator(itr);
@@ -121,7 +154,7 @@ int main(int argc, char *argv[])
 
             case 'u':
                 printf("USER? "); uname = readUntil(stdin, '\n');
-                TweetSeq s = FindByUser(db, uname);
+                s = FindByUser(db, uname);
                 if(s.seq) {
                     ShowSeq(s);
                 } else {
@@ -133,20 +166,20 @@ int main(int argc, char *argv[])
                 FreeTweetSeq(s);
             break;
 
-            case 'f': /*
+            case 'f':
                 printf("FAVORITE_COUNT? ");
-                scanf("%zu", &n);
-                CLEAR();
-                if(GetTweet(db, n, &t) == 0) {
-                    printf("(FAVORITE_COUNT: %zu)\n", n);
-                    printTweet(&t);
+                scanf(" %zu", &n); fgetc(stdin);
+                s = FindByFav(db, (uint32_t) n);
+                if(s.seq) {
+                    ShowSeq(s);
                 } else {
-                    printf("FAVORITE_COUNT Não encontrado!\n");
+                    CLEAR();
+                    printf("Nenhum Tweet encontrado.\n");
+                    readOpt();
                 }
-                readOpt();
-                readOpt();
+                FreeTweetSeq(s);
             break;
-
+/*
             case 'l':
                 printf("LANGUAGE? ");
                 scanf("%s", &language);
@@ -197,15 +230,23 @@ int main(int argc, char *argv[])
                 break;*/
 
             case 'x':
-                printf("OFFSET? ");
-                scanf(" %i", (int*) &n); fgetc(stdin);
-                CLEAR();
-                if(RemoveTweet(db, (uint32_t) n)) {
-                    printf("Falha ao remover tweet.\n");
+                printf("FAVORITE_COUNT? ");
+                scanf(" %zu", &n); fgetc(stdin);
+                s = FindByFav(db, (uint32_t) n);
+                if(s.seq) {
+                    if(RemoveTweet(db, ChooseSeq(s))) {
+                        CLEAR();
+                        printf("Não removeu o tweet.\n");
+                    } else {
+                        CLEAR();
+                        printf("Tweet removido com sucesso.\n");
+                    }
                 } else {
-                    printf("Tweet removido com sucesso.\n");
+                    CLEAR();
+                    printf("Nenhum Tweet encontrado.\n");
                 }
                 readOpt();
+                FreeTweetSeq(s);
             break;
 
             case 'q':
